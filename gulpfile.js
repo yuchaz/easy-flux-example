@@ -6,6 +6,10 @@ var source = require('vinyl-source-stream');
 var uglify = require('gulp-uglify');
 var rename = require('gulp-rename');
 var runSequence = require('run-sequence');
+var sourcemaps = require('gulp-sourcemaps');
+var gutil = require('gulp-util');
+var buffer = require('vinyl-buffer');
+
 
 gulp.task('build', function () {
   return browserify({
@@ -16,6 +20,12 @@ gulp.task('build', function () {
   .transform('babelify', {'presets': ['es2015', 'react']})
   .bundle()
   .pipe(source('bundle.js'))
+  .pipe(buffer())
+  .pipe(sourcemaps.init({loadMaps: true}))
+      // Add transformation tasks to the pipeline here.
+      // .pipe(uglify())
+      .on('error', gutil.log)
+  .pipe(sourcemaps.write('./'))
   .pipe(gulp.dest('dist'));
 });
 
@@ -26,6 +36,11 @@ gulp.task('compress', function() {
     .pipe(gulp.dest('dist'));
 });
 
+// gulp.task('default', function(cb) {
+//   runSequence('build','compress', cb);
+// });
+
+
 gulp.task('default', function(cb) {
-  runSequence('build','compress', cb);
+  runSequence('build', cb);
 });
